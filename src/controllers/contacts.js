@@ -6,13 +6,27 @@ import {
   deleteContact,
 } from '../services/contacts.js';
 import createError from 'http-errors';
+import parsePaginationParams from '../utils/parsePaginationParams.js';
+import parseSortParams from '../utils/parseSortParams.js';
+import parseFilterParams from '../utils/parseFilterParams.js';
 
 export const getAllContactsController = async (req, res) => {
-  const contacts = await getAllContacts();
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
+
+  const paginationData = await getAllContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    filter,
+  });
+
   res.status(200).json({
     status: 200,
     message: 'Successfully found contacts!',
-    data: contacts,
+    data: paginationData,
   });
 };
 
@@ -33,18 +47,6 @@ export const getContactByIdController = async (req, res) => {
 
 export const createContactController = async (req, res) => {
   const { name, phoneNumber, email, isFavourite, contactType } = req.body;
-
-  if (!name) {
-    throw createError(400, 'Name is required');
-  }
-
-  if (!phoneNumber) {
-    throw createError(400, 'Phone number is required');
-  }
-
-  if (!contactType) {
-    throw createError(400, 'Contact type is required');
-  }
 
   const contactData = {
     name,
@@ -93,10 +95,6 @@ export const updateContactController = async (req, res) => {
 
   if (contactType !== undefined) {
     updateData.contactType = contactType;
-  }
-
-  if (Object.keys(updateData).length === 0) {
-    throw createError(400, 'No update data provided');
   }
 
   const updatedContact = await updateContact(contactId, updateData);
