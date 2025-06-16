@@ -27,10 +27,18 @@ const contactSchema = new mongoose.Schema(
       required: true,
       default: 'personal',
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'users',
+      required: [true, 'User ID is required'],
+    },
   },
   {
     versionKey: false,
     timestamps: true,
   },
 );
+
+contactSchema.index({ userId: 1 });
+
 export const Contact = mongoose.model('contacts', contactSchema);
