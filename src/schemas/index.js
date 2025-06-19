@@ -59,6 +59,7 @@ export const createContactSchema = Joi.object({
       'any.only': 'Contact type must be one of: work, home, personal',
       'any.required': 'Contact type is required',
     }),
+  photo: Joi.string().optional(),
 });
 
 export const updateContactSchema = Joi.object({
@@ -91,3 +92,22 @@ export const updateContactSchema = Joi.object({
   .messages({
     'object.min': 'At least one field must be provided for update',
   });
+
+// Email Schemas
+export const sendResetEmailSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    'string.email': 'Email must be a valid email address',
+    'any.required': 'Email is required',
+  }),
+});
+
+export const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    'any.required': 'Token is required',
+  }),
+
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Password must be at least 6 characters long',
+    'any.required': 'Password is required',
+  }),
+});

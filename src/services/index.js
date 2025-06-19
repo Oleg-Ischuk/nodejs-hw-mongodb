@@ -2,6 +2,8 @@ import { User, Session, Contact } from '../db/models/index.js';
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 // Auth Services
 export const registerUser = async (userData) => {
@@ -159,6 +161,93 @@ export const logoutUser = async (refreshToken) => {
     return { success: true };
   } catch (error) {
     console.error('Error in logoutUser service:', error);
+    throw error;
+  }
+};
+
+export const sendResetEmail = async (email) => {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw createHttpError(404, 'User not found!');
+    }
+
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: '5m', // 5 хвилин
+    });
+
+    const resetLink = `${process.env.APP_DOMAIN}/reset-password?token=${token}`;
+
+    const transporter = nodemailer.createTransporter({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+    console.log('SMTP_PASSWORD:', process.env.SMTP_PASSWORD);
+    const mailOptions = {
+      from: process.env.SMTP_FROM,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>You have requested to reset your password. Please click the link below to reset your password:</p>
+        <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+        <p>This link will expire in 5 minutes.</p>
+        <p>If you did not request this password reset, please ignore this email.</p>
+      `,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      return { success: true };
+    } catch (emailError) {
+      console.error('Error sending email:', emailError);
+      throw createHttpError(
+        500,
+        'Failed to send the email, please try again later.',
+      );
+    }
+  } catch (error) {
+    console.error('Error in sendResetEmail service:', error);
+    throw error;
+  }
+};
+
+export const resetPassword = async (token, newPassword) => {
+  try {
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      throw createHttpError(
+        401,
+        `Token is expired or invalid: ${jwtError.message}`,
+      );
+    }
+
+    const { email } = decodedToken;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw createHttpError(404, 'User not found!');
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    await User.findByIdAndUpdate(user._id, {
+      password: hashedPassword,
+    });
+
+    await Session.deleteMany({ userId: user._id });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in resetPassword service:', error);
     throw error;
   }
 };

@@ -3,6 +3,8 @@ import {
   loginUser,
   refreshUserSession,
   logoutUser,
+  sendResetEmail,
+  resetPassword,
   getAllContacts,
   getContactsById,
   createContact,
@@ -99,6 +101,30 @@ export const logoutUserController = async (req, res) => {
   res.status(204).end();
 };
 
+export const sendResetEmailController = async (req, res) => {
+  const { email } = req.body;
+
+  await sendResetEmail(email);
+
+  res.status(200).json({
+    status: 200,
+    message: 'Reset password email has been successfully sent.',
+    data: {},
+  });
+};
+
+export const resetPasswordController = async (req, res) => {
+  const { token, password } = req.body;
+
+  await resetPassword(token, password);
+
+  res.status(200).json({
+    status: 200,
+    message: 'Password has been successfully reset.',
+    data: {},
+  });
+};
+
 // Contact Controllers
 export const getAllContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -158,6 +184,9 @@ export const createContactController = async (req, res) => {
     contactData.isFavourite = isFavourite;
   }
 
+  if (req.file) {
+    contactData.photo = req.file.path;
+  }
   const newContact = await createContact(contactData);
 
   res.status(201).json({
@@ -192,6 +221,10 @@ export const updateContactController = async (req, res) => {
 
   if (contactType !== undefined) {
     updateData.contactType = contactType;
+  }
+
+  if (req.file) {
+    updateData.photo = req.file.path;
   }
 
   const updatedContact = await updateContact(contactId, updateData, userId);
