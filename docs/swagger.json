@@ -16,10 +16,6 @@
   ],
   "tags": [
     {
-      "name": "CRUD",
-      "description": "Endpoints for CRUD operations on contacts"
-    },
-    {
       "name": "Contacts",
       "description": "Contact management endpoints for CRUD operations"
     }
