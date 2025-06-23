@@ -7,8 +7,8 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   description: A RESTful API for managing user contacts with authentication, password reset functionality, and photo upload capabilities. Users can register, login, manage their contacts with CRUD operations, and upload contact photos to Cloudinary.
 tags:
-  - name: Auth
-    description: Authentication endpoints for user registration, login, session management and password reset
+  - name: CRUD
+    description: description: Endpoints for CRUD operations on
   - name: Contacts
     description: Contact management endpoints for CRUD operations
 servers:
