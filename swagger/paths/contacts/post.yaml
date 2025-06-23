@@ -1,0 +1,103 @@
+tags:
+  - Contacts
+summary: Create a new contact
+operationId: createContact
+description: Create a new contact with required fields and optional photo upload. The contact will be associated with the authenticated user.
+security:
+  - bearerAuth: []
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - name
+          - phoneNumber
+          - contactType
+        properties:
+          name:
+            type: string
+            description: Contact's full name
+            minLength: 3
+            maxLength: 20
+            example: 'Jane Smith'
+          phoneNumber:
+            type: string
+            description: Contact's phone number
+            minLength: 3
+            maxLength: 20
+            example: '+1234567890'
+          email:
+            type: string
+            format: email
+            description: Contact's email address (optional)
+            minLength: 3
+            maxLength: 20
+            example: 'jane.smith@example.com'
+          isFavourite:
+            type: boolean
+            description: Whether the contact is marked as favourite
+            default: false
+            example: false
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            description: Type of contact
+            example: 'personal'
+          photo:
+            type: string
+            format: binary
+            description: Contact photo file (max 5MB, formats:jpg, jpeg, png, gif)
+responses:
+  '201':
+    description: Contact created successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: 'Successfully created a contact!'
+            data:
+              $ref: '../../components/schemas/contact.yaml'
+  '400':
+    description: Validation error or invalid file
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: 'Name must be at least 3 characters long'
+            data:
+              type: string
+              example: 'Name must be at least 3 characters long'
+  '401':
+    description: Unauthorized - invalid or missing access token
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 401
+            message:
+              type: string
+              example: 'Please provide Authorization header'
+            data:
+              type: string
+              example: 'Please provide Authorization header'

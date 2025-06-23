@@ -1,0 +1,124 @@
+tags:
+  - Contacts
+summary: Update contact
+operationId: updateContact
+description: Update an existing contact's information. At least one field must be provided. Only contacts belonging to the authenticated user can be updated.
+security:
+  - bearerAuth: []
+parameters:
+  - name: contactId
+    in: path
+    required: true
+    description: The unique identifier of the contact to update
+    schema:
+      type: string
+      pattern: '^[0-9a-fA-F]{24}$'
+      example: '65f1234567890abcdef123456'
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        minProperties: 1
+        properties:
+          name:
+            type: string
+            description: Contact's full name
+            minLength: 3
+            maxLength: 20
+            example: 'Jane Smith Updated'
+          phoneNumber:
+            type: string
+            description: Contact's phone number
+            minLength: 3
+            maxLength: 20
+            example: '+1234567891'
+          email:
+            type: string
+            format: email
+            description: Contact's email address
+            minLength: 3
+            maxLength: 20
+            example: 'jane.updated@example.com'
+          isFavourite:
+            type: boolean
+            description: Whether the contact is marked as favourite
+            example: true
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            description: Type of contact
+            example: 'work'
+          photo:
+            type: string
+            format: binary
+            description: Contact photo file (max 5MB, formats:jpg, jpeg, png, gif)
+responses:
+  '200':
+    description: Contact updated successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: 'Successfully patched a contact!'
+            data:
+              $ref: '../../../components/schemas/contact.yaml'
+  '400':
+    description: Invalid contact ID format or validation error
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: 'At least one field must be provided for update'
+            data:
+              type: string
+              example: 'At least one field must be provided for update'
+  '401':
+    description: Unauthorized - invalid or missing access token
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 401
+            message:
+              type: string
+              example: 'Please provide Authorization header'
+            data:
+              type: string
+              example: 'Please provide Authorization header'
+  '404':
+    description: Contact not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 404
+            message:
+              type: string
+              example: 'Contact not found'
+            data:
+              type: string
+              example: 'Contact not found'
