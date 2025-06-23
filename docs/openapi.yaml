@@ -8,7 +8,7 @@ info:
   description: A RESTful API for managing user contacts with authentication, password reset functionality, and photo upload capabilities. Users can register, login, manage their contacts with CRUD operations, and upload contact photos to Cloudinary.
 tags:
   - name: CRUD
-    description: description: Endpoints for CRUD operations on
+    description: Endpoints for CRUD operations on contacts
   - name: Contacts
     description: Contact management endpoints for CRUD operations
 servers:

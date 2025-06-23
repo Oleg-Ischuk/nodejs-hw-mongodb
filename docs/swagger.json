@@ -16,8 +16,8 @@
   ],
   "tags": [
     {
-      "name": "Auth",
-      "description": "Authentication endpoints for user registration, login, session management and password reset"
+      "name": "CRUD",
+      "description": "Endpoints for CRUD operations on contacts"
     },
     {
       "name": "Contacts",
